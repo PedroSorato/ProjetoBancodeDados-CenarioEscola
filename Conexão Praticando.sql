@@ -1,0 +1,139 @@
+/* Liste os alunos matriculados no curso de “Banco de Dados”. */
+SELECT
+MT.ID_ALUNO, AL.NOME, CS.NOME
+FROM
+MATRICULAS MT
+INNER JOIN
+ALUNOS AL
+ON MT.ID_ALUNO = AL.ID_ALUNO
+INNER JOIN
+CURSOS CS
+ON MT.ID_CURSO = CS.ID_CURSO
+WHERE CS.NOME = 'Banco de Dados';
+
+/* Quais alunos têm nota menor que 6 na disciplina “SQL”? */
+SELECT
+AL.NOME, NT.ID_ALUNO, NT.NOTA, DP.NOME
+FROM
+NOTAS NT
+INNER JOIN
+ALUNOS AL
+ON NT.ID_ALUNO = AL.ID_ALUNO
+INNER JOIN
+DISCIPLINAS DP
+ON NT.ID_DISCIPLINA = DP.ID_DISCIPLINA
+WHERE DP.NOME = 'SQL' AND NOTA < 6;
+
+/* Traga os alunos que não estão matriculados em nenhum curso (LEFT JOIN). */
+SELECT AL.ID_ALUNO, AL.NOME
+FROM ALUNOS AL
+LEFT JOIN MATRICULAS ML
+ON AL.ID_ALUNO = ML.ID_ALUNO
+WHERE ML.ID_ALUNO IS NULL;
+
+/* Liste os professores e quantas disciplinas cada um ministra (GROUP BY + HAVING). */
+SELECT 
+PF.NOME, COUNT(DP.ID_DISCIPLINA)
+FROM
+PROFESSORES PF
+INNER JOIN
+DISCIPLINAS DP
+ON PF.ID_PROFESSOR = DP.ID_PROFESSOR
+GROUP BY PF.NOME
+HAVING COUNT(DP.ID_DISCIPLINA) >= 1;
+
+/* Mostre os cursos que têm mais de 3 alunos matriculados (GROUP BY + HAVING). */
+SELECT
+CS.NOME, COUNT(MT.ID_ALUNO) AS "QUANTIDADE DE ALUNOS MATRICULADOS"
+FROM
+MATRICULAS MT
+INNER JOIN 
+CURSOS CS 
+ON MT.ID_CURSO = CS.ID_CURSO
+GROUP BY CS.NOME
+HAVING COUNT(MT.ID_ALUNO) > 3;
+
+/* Traga os alunos e o total de disciplinas que estão cursando. */
+SELECT
+ID_ALUNO, COUNT(*) AS "TOTAL DE DISCIPLINAS"
+FROM
+NOTAS
+GROUP BY ID_ALUNO
+HAVING COUNT(*) > 0;
+
+/* Classifique os alunos como:
+
+Nota média >= 7 → Aprovado
+
+Nota média entre 5 e 6.99 → Recuperação
+
+Nota média < 5 → Reprovado
+(Use CASE WHEN)
+ */
+SELECT AL.NOME,
+ROUND(AVG(NT.NOTA),2) AS MEDIA,
+CASE
+WHEN AVG(NT.NOTA)>= 7 THEN 'APROVADO'
+WHEN AVG(NT.NOTA) BETWEEN 5 AND 6.99 THEN 'RECUPERACAO'
+ELSE 'REPROVADO'
+END "RESULTADO FINAL"
+FROM 
+NOTAS NT
+INNER JOIN
+ALUNOS AL 
+ON NT.ID_ALUNO = AL.ID_ALUNO
+GROUP BY AL.NOME;
+
+/* Liste os alunos que fazem curso de Banco de Dados ou Desenvolvimento Web (IN). */
+SELECT 
+ID_ALUNO, ID_CURSO
+FROM
+MATRICULAS 
+WHERE ID_CURSO IN (1, 2);
+
+/* Liste os alunos cujos nomes começam com a letra ‘A’ (LIKE). */
+SELECT 
+*
+FROM
+ALUNOS
+WHERE NOME LIKE 'A%';
+
+/* Mostre os alunos, os cursos e as disciplinas, com seus professores responsáveis (INNER JOIN entre tudo). */
+SELECT
+AL.NOME, AL.ID_ALUNO, DP.NOME, PF.NOME, DP.NOME
+FROM
+ALUNOS AL 
+INNER JOIN 
+MATRICULAS MT
+ON AL.ID_ALUNO = MT.ID_ALUNO
+INNER JOIN 
+DISCIPLINAS DP
+ON MT.ID_CURSO = DP.ID_CURSO
+INNER JOIN
+PROFESSORES PF
+ON DP.ID_PROFESSOR = PF.ID_PROFESSOR;
+
+/* Mostre os 3 primeiros alunos cadastrados (ROWNUM). */
+SELECT * FROM ALUNOS WHERE ROWNUM <= 3;
+
+/* Traga todos os nomes de cursos e disciplinas (UNION). */
+SELECT NOME
+FROM CURSOS
+UNION ALL
+SELECT NOME
+FROM DISCIPLINAS;
+
+/* Calcule, para cada aluno, a diferença percentual entre a nota máxima (10) e a nota que ele tirou. */
+SELECT 
+AL.NOME AS ALUNO, DP.NOME AS DISCIPLINA,
+ROUND(((10 - NT.NOTA) / 10 ) * 100,2) AS "DIFERENCA EM PORCENTAGEM"
+FROM ALUNOS AL
+INNER JOIN
+NOTAS NT 
+ON AL.ID_ALUNO = NT.ID_ALUNO
+INNER JOIN
+DISCIPLINAS DP
+ON NT.ID_DISCIPLINA = DP.ID_DISCIPLINA;
+
+
+
